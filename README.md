@@ -1,3 +1,6 @@
+![Logo del juego](Logoimage.jpeg)
+
+
 # 🧠 Juego Adivina el Número (4 cifras)
 
 Este proyecto es un juego interactivo en consola donde **la computadora intenta adivinar un número secreto de 4 dígitos** que tú has pensado. El rango es desde `0000` hasta `9999`.  
