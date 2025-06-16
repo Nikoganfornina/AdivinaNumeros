@@ -1,0 +1,100 @@
+package org.example;
+
+import java.util.*;
+
+public class AdivinaNumero {
+    static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("🧠 Este es el juego de adivinar el número.");
+        Thread.sleep(1000);
+        System.out.println("🤫 Piensa en un número secreto de 4 cifras (de 0000 a 9999).");
+        Thread.sleep(1000);
+        System.out.println("🔢 Yo intentaré adivinarlo. Tú solo dime cuántos dígitos he acertado en su lugar correcta (0-4).\n");
+        Thread.sleep(1000);
+
+        List<String> posibles = generarCombinaciones();
+        int intentos = 0;
+
+        while (!posibles.isEmpty()) {
+            String intento = elegirMejorIntento(posibles);
+            intentos++;
+            System.out.println("Intento #" + intentos + ": ¿Es este tu número? → " + intento);
+            System.out.print("Dime cuántos aciertos (0-4): ");
+            int aciertos;
+            while (true) {
+                try {
+                    aciertos = Integer.parseInt(scanner.nextLine());
+                    if (aciertos < 0 || aciertos > 4) {
+                        throw new NumberFormatException();
+                    }
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.print("Entrada inválida. Introduce un número entre 0 y 4: ");
+                }
+            }
+
+            if (aciertos == 4) {
+                System.out.println("🎉 ¡He adivinado tu número en " + intentos + " intentos! Era: " + intento);
+                break;
+            }
+
+            List<String> nuevasPosibles = new ArrayList<>();
+            for (String candidato : posibles) {
+                if (comparar(intento, candidato) == aciertos) {
+                    nuevasPosibles.add(candidato);
+                }
+            }
+
+            if (nuevasPosibles.isEmpty()) {
+                System.out.println("😕 Algo no cuadra... ¿Estás seguro de que diste bien los aciertos? Voy a mantener las combinaciones por si acaso.");
+                continue;
+            }
+
+            posibles = nuevasPosibles;
+        }
+    }
+
+    public static List<String> generarCombinaciones() {
+        List<String> lista = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            lista.add(String.format("%04d", i));
+        }
+        return lista;
+    }
+
+    public static int comparar(String intento, String secreto) {
+        int coincidencias = 0;
+        for (int i = 0; i < 4; i++) {
+            if (intento.charAt(i) == secreto.charAt(i)) {
+                coincidencias++;
+            }
+        }
+        return coincidencias;
+    }
+
+    // Elige el mejor intento según minimax (reduce peor caso)
+    public static String elegirMejorIntento(List<String> candidatos) {
+        String mejorIntento = null;
+        int mejorMaxGrupo = Integer.MAX_VALUE;
+
+        for (String intento : candidatos) {
+            // Mapa: feedback -> cantidad de candidatos que quedan si se responde así
+            Map<Integer, Integer> cuentaFeedback = new HashMap<>();
+
+            for (String posibleSecreto : candidatos) {
+                int feedback = comparar(intento, posibleSecreto);
+                cuentaFeedback.put(feedback, cuentaFeedback.getOrDefault(feedback, 0) + 1);
+            }
+
+            int maxGrupo = Collections.max(cuentaFeedback.values());
+
+            if (maxGrupo < mejorMaxGrupo) {
+                mejorMaxGrupo = maxGrupo;
+                mejorIntento = intento;
+            }
+        }
+
+        return mejorIntento;
+    }
+}
